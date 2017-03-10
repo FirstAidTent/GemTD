@@ -80,6 +80,7 @@ class GameScreen extends Screen {
 
         gridbox = new Gridbox(game.getGraphics());
 
+        // Towers
         redTower[0] = new Tower(877, 22);
         redTower[1] = new Tower(832, 67);
         redTower[2] = new Tower(787, 112);
