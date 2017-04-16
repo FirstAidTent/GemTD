@@ -79,11 +79,11 @@ abstract class Enemy {
     // Override it if you want to change enemy behavior.
     void update(float deltaTime) {
         if (isSpawned) {
-            move(deltaTime);
-            updateSprite();
-            updateHitbox();
-
-            if (health <= 0) {
+            if (health > 0) {
+                move(deltaTime);
+                updateSprite();
+                updateHitbox();
+            } else {
                 die();
             }
         }

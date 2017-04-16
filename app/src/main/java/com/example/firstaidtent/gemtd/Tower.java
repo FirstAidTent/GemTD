@@ -38,8 +38,8 @@ class Tower {
         centerY = y;
 
         attackDamage = 1;
-        attackRate = 0.10;
-        attackRange = 300.00;
+        attackRate = 0.25;
+        attackRange = 200.00; // range = (Warcraft range) / 3
 
         attackCD = 0.00;
 
@@ -72,7 +72,7 @@ class Tower {
             if (currentTarget.isDead() || targetOutOfRange()) {
                 searchTargetClosest();
             } else {
-                attack(deltaTime);
+                attack();
             }
         } else {
             searchTargetClosest();
@@ -84,39 +84,45 @@ class Tower {
         spriteY = (int) Math.round(centerY - sprite.getHeight() / 2);
     }
 
-    private void attack(float deltaTime) {
+    private void attack() {
         if (attackCD <= 0.00) {
             attackCD = attackRate;
+
+            // Create a projectile, which will automatically move against the current target.
             Projectile p = new Projectile(centerX, centerY, currentTarget);
         }
     }
 
-    private boolean searchTargetClosest() {
+    // Searches for and sets the towers current target to the closest enemy.
+    private void searchTargetClosest() {
         List<Enemy> enemies = Enemy.getEnemies();
         double distance;
-        double min_dist = 2000.00;
+        double min_dist = 2000.00; // Is used to store the closest distance to an enemy.
         Enemy target = null;
         Enemy e;
 
         for (int i = 0; i < enemies.size(); i++) {
             e = enemies.get(i);
             distance = Math.sqrt(Math.pow((e.getCenterX() - centerX), 2) + Math.pow((e.getCenterY() - centerY), 2));
+
+            // Checks if the enemy is closer than the other enemies the have been checked.
             if (distance < min_dist && distance <= attackRange) {
                 min_dist = distance;
                 target = e;
             }
         }
 
+        // If an enemy was found within the attack range, set the current target to the closest enemy found.
         if (target != null) {
             currentTarget = target;
-            return true;
+            return;
         }
 
         currentTarget = null;
-        return false;
     }
 
-    private boolean searchTargetFurthest() {
+    // Works just like searchTargetClosest(), but searches for the target furthest away, but still within attack range.
+    private void searchTargetFurthest() {
         List<Enemy> enemies = Enemy.getEnemies();
         double distance;
         double min_dist = 0.00;
@@ -134,11 +140,10 @@ class Tower {
 
         if (target != null) {
             currentTarget = target;
-            return true;
+            return;
         }
 
         currentTarget = null;
-        return false;
     }
 
     private boolean checkEnemiesInRange() {

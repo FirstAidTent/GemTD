@@ -25,7 +25,7 @@ class GameScreen extends Screen {
     private int livesLeft;
     private Paint paint;
     private Paint paint2;
-    private Paint paintDebug;
+    static Paint paintDebug;
 
     private int shootTouchId;
     private int jumpTouchId;
@@ -33,7 +33,7 @@ class GameScreen extends Screen {
     private Level currentLevel;
     private Wave currentWave;
 
-    private Gridbox gridbox;
+    private Grid grid;
 
     private Tower[] redTower = new Tower[5];
 
@@ -78,14 +78,14 @@ class GameScreen extends Screen {
         currentWave = currentLevel.getCurrentWave();
         Progress.setCurrentWave(currentWave);
 
-        gridbox = new Gridbox(game.getGraphics());
+        grid = new Grid(game.getGraphics());
 
         // Towers
-        redTower[0] = new Tower(877, 22);
-        redTower[1] = new Tower(832, 67);
-        redTower[2] = new Tower(787, 112);
-        redTower[3] = new Tower(832, 157);
-        redTower[4] = new Tower(877, 202);
+        redTower[0] = new Tower(720, 90);
+        redTower[1] = new Tower(810, 90);
+        redTower[2] = new Tower(720, 157);
+        redTower[3] = new Tower(810, 157);
+        redTower[4] = new Tower(630, 124);
 
 
         shootTouchId = -1;
@@ -263,6 +263,36 @@ class GameScreen extends Screen {
         updateEnemies(deltaTime);
     }
 
+    private void updateTowers(float deltaTime) {
+
+        List<Tower> towers = Tower.getTowers();
+        for (int i = 0; i < towers.size(); i++) {
+            Tower t = towers.get(i);
+            t.update(deltaTime);
+        }
+
+    }
+
+    private void updateProjectiles(float deltaTime) {
+
+        List<Projectile> projectiles = Projectile.getProjectiles();
+        for (int i = 0; i < projectiles.size(); i++) {
+            Projectile p = projectiles.get(i);
+            p.update(deltaTime);
+        }
+
+    }
+
+    private void updateEnemies(float deltaTime) {
+
+        List<Enemy> enemies = Enemy.getEnemies();
+        for (int i = 0; i < enemies.size(); i++) {
+            Enemy e = enemies.get(i);
+            e.update(deltaTime);
+        }
+
+    }
+
     private boolean inBoundsRect(TouchEvent event, int x, int y, int width,
                                  int height) {
         return (event.x > x && event.x < x + width - 1 && event.y > y
@@ -322,36 +352,6 @@ class GameScreen extends Screen {
 //
 //    }
 
-    private void updateTowers(float deltaTime) {
-
-        List<Tower> towers = Tower.getTowers();
-        for (int i = 0; i < towers.size(); i++) {
-            Tower t = towers.get(i);
-            t.update(deltaTime);
-        }
-
-    }
-
-    private void updateProjectiles(float deltaTime) {
-
-        List<Projectile> projectiles = Projectile.getProjectiles();
-        for (int i = 0; i < projectiles.size(); i++) {
-            Projectile p = projectiles.get(i);
-            p.update(deltaTime);
-        }
-
-    }
-
-    private void updateEnemies(float deltaTime) {
-
-        List<Enemy> enemies = Enemy.getEnemies();
-        for (int i = 0; i < enemies.size(); i++) {
-            Enemy e = enemies.get(i);
-            e.update(deltaTime);
-        }
-
-    }
-
     // Draws everything on the screen
     @Override
     public void paint(float deltaTime) {
@@ -388,7 +388,7 @@ class GameScreen extends Screen {
             }
         }
 
-        //gridbox.drawGridAll();
+        //grid.drawGridAll();
 
 //        // Debug Stuff
 //        if (!debugString.equals("")) {

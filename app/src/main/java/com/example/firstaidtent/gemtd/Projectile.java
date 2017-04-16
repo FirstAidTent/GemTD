@@ -34,8 +34,8 @@ class Projectile {
         visible = true;
         sprite = Assets.projectile;
 
-        AoE.set((int) centerX - sprite.getWidth() / 2, (int) centerY - sprite.getHeight() / 2,
-                (int) centerX + sprite.getWidth() / 2, (int) centerY + sprite.getHeight() / 2);
+        updateSprite();
+        updateHitbox();
 
         projectiles.add(this);
     }

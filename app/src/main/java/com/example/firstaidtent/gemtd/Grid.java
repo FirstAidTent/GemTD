@@ -7,12 +7,12 @@ import com.example.firstaidtent.framework.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
-class Gridbox {
-    private static final int WIDTH = GameScreen.SCREEN_WIDTH;
-    private static final int HEIGHT = GameScreen.SCREEN_HEIGHT;
+class Grid {
+    private static final int WIDTH = 990;
+    private static final int HEIGHT = 720;
 
-    private static final int WIDTH_BOX_MAX = 16;
-    private static final int HEIGHT_BOX_MAX = 9;
+    private static final int WIDTH_BOX_MAX = 44;
+    private static final int HEIGHT_BOX_MAX = 32;
 
     private List<Integer> gridX = new ArrayList<>();
     private List<Integer> gridY = new ArrayList<>();
@@ -23,7 +23,7 @@ class Gridbox {
 
     private Graphics graphics;
 
-    Gridbox(Graphics g) {
+    Grid(Graphics g) {
         graphics = g;
     }
 
@@ -43,20 +43,26 @@ class Gridbox {
     }
 
     void drawGridAll() {
+        int lineX;
+        int lineY;
+
         for (int i = 0; i <= WIDTH_BOX_MAX; i++) {
-            if (i == WIDTH_BOX_MAX) {
-                graphics.drawLine(i * WIDTH / WIDTH_BOX_MAX - 1, 0, i * WIDTH / WIDTH_BOX_MAX - 1, HEIGHT, Color.WHITE);
-            } else {
-                graphics.drawLine(i * WIDTH / WIDTH_BOX_MAX, 0, i * WIDTH / WIDTH_BOX_MAX, HEIGHT, Color.WHITE);
+            lineX = i * WIDTH / WIDTH_BOX_MAX;
+            lineY = i * HEIGHT / HEIGHT_BOX_MAX;
+
+            if (lineY > 720) {
+                lineY = lineY - 720;
             }
+
+            graphics.drawLine(lineX, 0, lineX, HEIGHT, Color.WHITE);
+            graphics.drawString(String.valueOf(lineX), lineX, lineY, GameScreen.paintDebug);
         }
 
         for (int i = 0; i <= HEIGHT_BOX_MAX; i++) {
-            if (i == HEIGHT_BOX_MAX) {
-                graphics.drawLine(0, i * HEIGHT / HEIGHT_BOX_MAX - 1, WIDTH, i * HEIGHT / HEIGHT_BOX_MAX - 1, Color.WHITE);
-            } else {
-                graphics.drawLine(0, i * HEIGHT / HEIGHT_BOX_MAX, WIDTH, i * HEIGHT / HEIGHT_BOX_MAX, Color.WHITE);
-            }
+            lineY = i * HEIGHT / HEIGHT_BOX_MAX;
+
+            graphics.drawLine(0, lineY, WIDTH, lineY, Color.WHITE);
+            graphics.drawString(String.valueOf(lineY), 495, lineY, GameScreen.paintDebug);
         }
     }
 
