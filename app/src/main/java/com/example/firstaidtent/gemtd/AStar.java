@@ -18,7 +18,10 @@ class AStar {
     private Node goal;
 
     private static double heuristic(Node a, Node b) {
-        return (Math.abs(a.x - b.x) + Math.abs(a.y - b.y));
+//        return (Math.abs(a.x - b.x) + Math.abs(a.y - b.y));
+        double dx = Math.abs(a.x - b.x);
+        double dy = Math.abs(a.y - b.y);
+        return (dx + dy) + (Math.sqrt(2.0) - 2) * Math.min(dx, dy);
     }
 
     AStar(WeightedGraph<Node> graph, int x1, int y1, int x2, int y2) {
@@ -34,7 +37,7 @@ class AStar {
             }
         };
 
-        Queue<NodeTuple> frontier = new PriorityQueue<>(100, nodeComparator);
+        Queue<NodeTuple> frontier = new PriorityQueue<>(200, nodeComparator);
 
         start = graph.getClosestNode(x1, y1);
         goal = graph.getClosestNode(x2, y2);
@@ -57,6 +60,7 @@ class AStar {
                 if (!costSoFar.containsKey(next) || new_cost < costSoFar.get(next)) {
                     costSoFar.put(next, new_cost);
                     double priority = new_cost + heuristic(next, goal);
+//                    double priority = new_cost;
                     frontier.add(new NodeTuple(next, priority));
                     cameFrom.put(next, current);
                 }
@@ -126,7 +130,7 @@ class Node {
     Node(int x, int y) {
         this.x = x;
         this.y = y;
-        this.cost = 0.0;
+        this.cost = 1.0;
         passable = true;
     }
 
@@ -209,18 +213,20 @@ class SquareGrid implements WeightedGraph<Node> {
             diag_space = Math.sqrt(Math.pow(space, 2) * 2);
 
             if (distance <= Math.ceil(diag_space) && next.isPassable()) {
+                next.setCost(1.0);
                 if (Math.abs(next.x - node.x) > 0 && Math.abs(next.y - node.y) > 0) {
                     a = getClosestNode(node.x + (next.x - node.x), node.y);
                     b = getClosestNode(node.x, node.y + (next.y - node.y));
-                    if (!a.isPassable() && !b.isPassable()) {
+//                    if (!a.isPassable() && !b.isPassable()) {
+//                        continue;
+//                    }
+                    if (!a.isPassable() || !b.isPassable()) {
                         continue;
                     }
+                    next.setCost(Math.sqrt(2.0));
                 }
                 neighborNodes.add(next);
             }
-//            if (distance <= Math.ceil(space) && next.isPassable()) {
-//                neighborNodes.add(next);
-//            }
         }
 
         return neighborNodes;
