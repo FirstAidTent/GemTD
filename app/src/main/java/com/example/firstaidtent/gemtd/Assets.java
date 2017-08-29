@@ -7,10 +7,12 @@ class Assets {
     static Image menu;
     static Image splash;
     static Image gameScreen;
+    static Image gameScreenBorder;
     static Image[] yellowEnemy = new Image[5];
     static Image projectile;
     static Image towerRed;
     static Image[] gems = new Image[10];
+    static Image[] btnPlaceGem = new Image[2];
     //static Sound click;
     //static Music theme;
 

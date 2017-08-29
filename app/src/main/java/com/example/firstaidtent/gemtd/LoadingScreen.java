@@ -26,6 +26,7 @@ class LoadingScreen extends Screen {
 
         // Level Backgrounds
         Assets.gameScreen = g.newImage("game_screen.png", ImageFormat.RGB565);
+        Assets.gameScreenBorder = g.newImage("game_screen_border.png", ImageFormat.RGB565);
 
         // Enemies
         Assets.yellowEnemy[0] = g.newImage("enemies/enemy1small.png", ARGB4444);
@@ -36,10 +37,14 @@ class LoadingScreen extends Screen {
         // Towers
 //        Assets.towerRed = g.newImage("towers/tower_red.png", ImageFormat.ARGB4444);
         Bitmap gems = g.newBitmap("towers/gems.png", ImageFormat.ARGB4444);
-        Assets.towerRed = new AndroidImage(Bitmap.createBitmap(gems, 26, 176, 45, 45), ImageFormat.ARGB4444);
+        Assets.towerRed = new AndroidImage(Bitmap.createBitmap(gems, 29, 178, 40, 40), ImageFormat.ARGB4444);
 
         // Projectile
         Assets.projectile = g.newImage("towers/projectiles/projectile.png", ImageFormat.ARGB4444);
+
+        // Button Images
+        Assets.btnPlaceGem[0] = g.newImage("btn_place_gem.png", ImageFormat.ARGB4444);
+        Assets.btnPlaceGem[1] = g.newImage("btn_place_gem_active.png", ImageFormat.ARGB4444);
 
         // Stages
 //        Level[] level = new Level[3];

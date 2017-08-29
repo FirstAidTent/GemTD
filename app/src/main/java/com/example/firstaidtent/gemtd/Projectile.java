@@ -30,7 +30,7 @@ class Projectile {
 
         target = null;
 
-        speed = 800.00;
+        speed = 400.00;
         visible = true;
         sprite = Assets.projectile;
 
@@ -144,7 +144,6 @@ class Projectile {
     public double getSpeed() {
         return speed;
     }
-
 
     public void setSpeed(double speed) {
         this.speed = speed;

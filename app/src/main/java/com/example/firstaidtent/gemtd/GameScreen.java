@@ -22,6 +22,7 @@ class GameScreen extends Screen {
 
     // Variable Setup
     private Background bg;
+    private Background border;
     private int livesLeft;
     private Paint paint;
     private Paint paint2;
@@ -32,8 +33,6 @@ class GameScreen extends Screen {
 
     private Level currentLevel;
     private Wave currentWave;
-
-    private Grid grid;
 
     private Tower[] redTower = new Tower[5];
 
@@ -48,6 +47,9 @@ class GameScreen extends Screen {
     private int timer_sec;
     private int timer_min;
     private String timerString;
+    private String textMsg;
+
+    private Button btnPlaceGem;
 
 //    private static int[] JUMP_BTN_POS = {700, 350, 65, 65};
 //    private static int[] SHOOT_BTN_POS = {600, 350, 65, 65};
@@ -60,33 +62,33 @@ class GameScreen extends Screen {
         super(game);
 
         // Initialize game objects here
-        currentLevel = Level.createLevel(1, Assets.gameScreen, new Point(877, -10), new Point(112, 730));
+        currentLevel = Level.createLevel(1, Assets.gameScreen, new Point(880, -10), new Point(120, 730));
         Progress.setCurrentLevel(currentLevel);
-        currentLevel.addTurnPoint(new Point(877, 112));
-        currentLevel.addTurnPoint(new Point(427, 112));
-        currentLevel.addTurnPoint(new Point(427, 607));
-        currentLevel.addTurnPoint(new Point(877, 607));
-        currentLevel.addTurnPoint(new Point(877, 352));
-        currentLevel.addTurnPoint(new Point(112, 352));
+        currentLevel.addTurnPoint(new Point(880, 120));
+        currentLevel.addTurnPoint(new Point(440, 120));
+        currentLevel.addTurnPoint(new Point(440, 600));
+        currentLevel.addTurnPoint(new Point(880, 600));
+        currentLevel.addTurnPoint(new Point(880, 360));
+        currentLevel.addTurnPoint(new Point(120, 360));
 
         Wave wave = new Wave(currentLevel);
         wave.addEnemyType(Enemy.EnemyType.YELLOW_ENEMY, 20);
 
         currentLevel.setCurrentWave(1);
         bg = currentLevel.getBg();
+        border = new Background(0, 0, Assets.gameScreenBorder);
 
         currentWave = currentLevel.getCurrentWave();
         Progress.setCurrentWave(currentWave);
 
-        grid = new Grid(game.getGraphics());
-
         // Towers
-        redTower[0] = new Tower(720, 90);
-        redTower[1] = new Tower(810, 90);
-        redTower[2] = new Tower(720, 157);
-        redTower[3] = new Tower(810, 157);
-        redTower[4] = new Tower(630, 124);
+        redTower[0] = Tower.createTower(520, 120);
+        redTower[1] = Tower.createTower(480, 160);
+        redTower[2] = Tower.createTower(440, 200);
+        redTower[3] = Tower.createTower(400, 160);
+        redTower[4] = Tower.createTower(360, 120);
 
+        btnPlaceGem = new PlaceGemButton(1045, 180);
 
         shootTouchId = -1;
         jumpTouchId = -1;
@@ -95,6 +97,7 @@ class GameScreen extends Screen {
 
         timer = 0.00;
         timerString = "00:00.000";
+        textMsg = "";
 
         // Defining a paint object
         paint = new Paint();
@@ -159,6 +162,35 @@ class GameScreen extends Screen {
         timerString = String.format(Locale.ENGLISH, "%02d:%02d.%03d", timer_min, timer_sec, timer_milli);
         spawnTimer += deltaTime;
 
+        int len = touchEvents.size();
+        for (int i = 0; i < len; i++) {
+            TouchEvent event = (TouchEvent) touchEvents.get(i);
+
+            if (event.type == TouchEvent.TOUCH_UP) {
+                if (!textMsg.isEmpty()) {
+                    textMsg = "";
+                }
+
+                if (btnPlaceGem.isActive()) {
+                    if (inBoundsRect(event, 40, 40, 919, 639) && Grid.checkValidBuildLocation(Grid.getClosestBuildPointX(event.x), Grid.getClosestBuildPointY(event.y))) {
+                        textMsg = "";
+                        Tower.createTower(Grid.getClosestBuildPointX(event.x), Grid.getClosestBuildPointY(event.y));
+                    } else {
+                        if (!textMsg.equals("Invalid build location")) {
+                            textMsg = "Invalid build location";
+                        }
+                    }
+
+                }
+
+                for (Button button : Button.getButtons()) {
+                    if (button.isVisible() && inBoundsRect(event, button.getX(), button.getY(), button.getWidth(), button.getHeight())) {
+                        button.actions();
+                    }
+                }
+            }
+
+        }
 
         /*// All touch inputs are handled here:
         int len = touchEvents.size();
@@ -352,7 +384,8 @@ class GameScreen extends Screen {
 //
 //    }
 
-    // Draws everything on the screen
+    // Draws everything on the screen. The objects will be drawn above each other in the order they
+    // are placed here.
     @Override
     public void paint(float deltaTime) {
         Graphics g = game.getGraphics();
@@ -387,6 +420,20 @@ class GameScreen extends Screen {
 
             }
         }
+
+        // The Border
+        g.drawImage(border.getImage(), border.getBgX(), border.getBgY());
+
+        // Buttons
+        for (Button button : Button.getButtons()) {
+            g.drawImage(button.getImg(), button.getX(), button.getY());
+        }
+
+        // Text Messages
+        if (!textMsg.isEmpty()) {
+            g.drawString(textMsg, 300, 650, paintDebug);
+        }
+
 
         //grid.drawGridAll();
 

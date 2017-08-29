@@ -19,21 +19,16 @@ class Tower {
     private double centerX;
     private double centerY;
 
-    // The sprite of the enemy. In case you have an animation, you should set sprite to the
-    // first frame of your animation. spriteX and spriteY is where the upper-left corner of your
+    // The sprite of the tower. spriteX and spriteY is where the upper-left corner of your
     // image will be. They are usually (sprite width / 2) from the center.
-    // The spriteX and spriteY are also used even if you only have an animation.
+    // spriteX and spriteY will be set automatically and does not need to be changed manually.
     private Image sprite;
     private int spriteX;
     private int spriteY;
 
-    // The width and height of the tower in the grid.
-    private int width;
-    private int height;
-
     private static List<Tower> towers = new ArrayList<>();
 
-    Tower(int x, int y) {
+    private Tower(int x, int y) {
         centerX = x;
         centerY = y;
 
@@ -48,7 +43,7 @@ class Tower {
         towers.add(this);
     }
 
-    Tower(int x, int y, int damage, double rate, double range) {
+    private Tower(int x, int y, int damage, double rate, double range) {
         centerX = x;
         centerY = y;
 
@@ -61,6 +56,10 @@ class Tower {
         sprite = Assets.towerRed;
 
         towers.add(this);
+    }
+
+    static Tower createTower(int x, int y) {
+        return new Tower(x, y);
     }
 
     void update(float deltaTime) {
@@ -105,7 +104,7 @@ class Tower {
             e = enemies.get(i);
             distance = Math.sqrt(Math.pow((e.getCenterX() - centerX), 2) + Math.pow((e.getCenterY() - centerY), 2));
 
-            // Checks if the enemy is closer than the other enemies the have been checked.
+            // Checks if the enemy is closer than the other enemies that have been checked.
             if (distance < min_dist && distance <= attackRange) {
                 min_dist = distance;
                 target = e;
