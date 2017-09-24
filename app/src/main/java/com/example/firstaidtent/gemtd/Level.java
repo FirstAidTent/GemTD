@@ -12,9 +12,8 @@ class Level {
     private Background bg;
     private Point spawnPoint;
     private Point endPoint;
-
     private Wave currentWave;
-
+    private Grid grid;
     private List<Point> turnPoints = new ArrayList<>();
     private List<Wave> waves = new ArrayList<>();
     private static HashMap<Integer, Level> levels = new HashMap<>();
@@ -23,10 +22,28 @@ class Level {
         this.bg = new Background(0, 0, bg);
         this.spawnPoint = spawnPoint;
         this.endPoint = endPoint;
+        this.grid = null;
 
         levels.put(levelNum, this);
     }
 
+    /**
+     * Creates a new tower defense level. Used for when you want a new level layout and rules.
+     *
+     * @param levelNum
+     *        The level number for this level.
+     *
+     * @param bg
+     *        The background used for the level. It should be showing the level layout.
+     *
+     * @param spawnPoint
+     *        The point where the enemies will spawn from.
+     *
+     * @param endPoint
+     *        The point where the enemies will despawn. You will lose a life if enemies reach this point.
+     *
+     * @return The newly created level.
+     */
     public static Level createLevel(int levelNum, Image bg, Point spawnPoint, Point endPoint) {
 //        if (levels.containsKey(levelNum)) {
 //            return levels.get(levelNum);
@@ -67,6 +84,7 @@ class Level {
         waves.remove(w);
     }
 
+    // Getters and Setters
     public Background getBg() {
         return bg;
     }
@@ -109,6 +127,14 @@ class Level {
         } else {
             this.currentWave = waves.get(0);
         }
+    }
+
+    public Grid getGrid() {
+        return grid;
+    }
+
+    public void setGrid(Grid grid) {
+        this.grid = grid;
     }
 
     public List<Point> getTurnPoints() {

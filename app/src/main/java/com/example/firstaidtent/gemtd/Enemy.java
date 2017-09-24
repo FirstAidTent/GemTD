@@ -101,6 +101,7 @@ abstract class Enemy {
             if (distance <= getOriginalSpeed() * deltaTime) {
                 if (destPoint.equals(Progress.getCurrentLevel().getEndPoint())) {
                     die();
+                    Progress.loseLife(1);
                 }
 
                 moveTo(destPoint.x, destPoint.y);

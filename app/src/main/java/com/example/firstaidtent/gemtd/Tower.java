@@ -59,7 +59,16 @@ class Tower {
     }
 
     static Tower createTower(int x, int y) {
-        return new Tower(x, y);
+        // TODO: Get current level instead of 1.
+        Level level = Level.getLevel(1);
+        int newX = level.getGrid().getClosestBuildPointX(x);
+        int newY = level.getGrid().getClosestBuildPointY(y);
+
+        Tower t = new Tower(newX, newY);
+
+        level.getGrid().addInvalidBuildPointsSquareCenter(newX, newY, t.getSprite().getWidth());
+
+        return t;
     }
 
     void update(float deltaTime) {

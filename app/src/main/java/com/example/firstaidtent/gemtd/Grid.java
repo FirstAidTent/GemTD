@@ -1,45 +1,173 @@
 package com.example.firstaidtent.gemtd;
 
+import android.graphics.Point;
+
+import java.util.ArrayList;
+import java.util.List;
+
 class Grid {
-    private static final int WIDTH = 980;
-    private static final int HEIGHT = 680;
+    private int x;
+    private int y;
+    private int width;
+    private int height;
+    private int boxWidth;
+    private int boxHeight;
 
-    private static final int WIDTH_BOX_MAX = 44;
-    private static final int HEIGHT_BOX_MAX = 32;
+    private List<Point> invalidBuildPoints = new ArrayList<>();
 
-    private static final int BOX_WIDTH = 20;
-    private static final int BOX_HEIGHT = 20;
+    Grid(int x, int y, int width, int height, int boxW, int boxH) {
+        this.x         = x;
+        this.y         = y;
+        this.width     = width;
+        this.height    = height;
+        this.boxWidth  = boxW;
+        this.boxHeight = boxH;
+    }
 
-    static int getClosestBuildPointX(int x) {
+    boolean addInvalidBuildPointsSquareCenter(int x, int y, int length) {
+        return addInvalidBuildPointsRect(x - length / 2, y - length / 2, x + length / 2, y + length / 2);
+    }
+
+    boolean addInvalidBuildPointsRect(int x, int y, int x2, int y2) {
+        if (x > x2 || y > y2) {
+            return false;
+        }
+
+        int newX = x;
+        int newY = y;
+        boolean exists;
+
+        if (x % boxWidth != 0) {
+            newX = x + (boxWidth - x % boxWidth);
+        }
+
+        if (y % boxHeight != 0) {
+            newY = y + (boxHeight - y % boxHeight);
+        }
+
+        for (int i = newX; i <= x2; i += boxWidth) {
+            for (int j = newY; j <= y2; j += boxHeight) {
+                exists = false;
+                for (Point p : invalidBuildPoints) {
+                    if (i == p.x && j == p.y) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (exists) {
+                    continue;
+                }
+
+                invalidBuildPoints.add(new Point(i, j));
+            }
+        }
+
+        return true;
+    }
+
+    int getClosestBuildPointX(int x) {
         int newX;
 
-        if (x % BOX_WIDTH < BOX_WIDTH / 2) {
-            newX = x - (x % BOX_WIDTH);
+        if (x % boxWidth < boxWidth / 2) {
+            newX = x - (x % boxWidth);
         } else {
-            newX = x + (BOX_WIDTH - x % BOX_WIDTH);
+            newX = x + (boxWidth - x % boxWidth);
+        }
+
+        if (newX == this.x) {
+            newX = this.x + boxWidth;
+        }
+
+        if (newX == this.x + width) {
+            newX = (this.x + width) - boxWidth;
         }
 
         return newX;
     }
 
-    static int getClosestBuildPointY(int y) {
+    int getClosestBuildPointY(int y) {
         int newY;
 
-        if (y % BOX_HEIGHT < BOX_HEIGHT / 2) {
-            newY = y - (y % BOX_HEIGHT);
+        if (y % boxHeight < boxHeight / 2) {
+            newY = y - (y % boxHeight);
         } else {
-            newY = y + (BOX_HEIGHT - y % BOX_HEIGHT);
+            newY = y + (boxHeight - y % boxHeight);
+        }
+
+        if (newY == this.y) {
+            newY = this.y + boxHeight;
+        }
+
+        if (newY == this.y + height) {
+            newY = (this.y + height) - boxHeight;
         }
 
         return newY;
     }
 
-    static boolean checkValidBuildLocation(int x, int y) {
-        for (Tower t : Tower.getTowers()) {
-            if (x == t.getCenterX() && y == t.getCenterY()) {
+    boolean checkValidBuildLocation(int x, int y) {
+        int cx = getClosestBuildPointX(x);
+        int cy = getClosestBuildPointY(y);
+
+        for (Point p : invalidBuildPoints) {
+            if (cx == p.x && cy == p.y) {
                 return false;
             }
         }
+
         return true;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int getBoxWidth() {
+        return boxWidth;
+    }
+
+    public void setBoxWidth(int boxWidth) {
+        this.boxWidth = boxWidth;
+    }
+
+    public int getBoxHeight() {
+        return boxHeight;
+    }
+
+    public void setBoxHeight(int boxHeight) {
+        this.boxHeight = boxHeight;
+    }
+
+    List<Point> getInvalidBuildPoints() {
+        return invalidBuildPoints;
     }
 }

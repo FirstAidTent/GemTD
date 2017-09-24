@@ -5,7 +5,8 @@ class PlaceGemButton extends Button {
         super(x, y, 200, 50, Assets.btnPlaceGem[0]);
     }
 
-    void actions() {
+    @Override
+    void actions(GameScreen game) {
         if (!isActive()) {
             setActive(true);
             this.setImg(Assets.btnPlaceGem[1]);

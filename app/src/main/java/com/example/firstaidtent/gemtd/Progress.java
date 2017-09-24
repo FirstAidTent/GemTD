@@ -3,6 +3,7 @@ package com.example.firstaidtent.gemtd;
 class Progress {
     private static Level currentLevel;
     private static Wave currentWave;
+    private static int livesLeft;
 
     static Level getCurrentLevel() {
         return currentLevel;
@@ -18,5 +19,17 @@ class Progress {
 
     static void setCurrentWave(Wave currentWave) {
         Progress.currentWave = currentWave;
+    }
+
+    static int getLivesLeft() {
+        return livesLeft;
+    }
+
+    static void setLivesLeft(int livesLeft) {
+        Progress.livesLeft = livesLeft;
+    }
+
+    static void loseLife(int n) {
+        setLivesLeft(getLivesLeft() - n);
     }
 }

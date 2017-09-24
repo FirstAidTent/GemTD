@@ -18,12 +18,11 @@ class GameScreen extends Screen {
         Ready, Running, Paused, GameOver
     }
 
-    private GameState state = GameState.Running;
+    private GameState gameState = GameState.Ready;
 
     // Variable Setup
     private Background bg;
     private Background border;
-    private int livesLeft;
     private Paint paint;
     private Paint paint2;
     static Paint paintDebug;
@@ -34,7 +33,7 @@ class GameScreen extends Screen {
     private Level currentLevel;
     private Wave currentWave;
 
-    private Tower[] redTower = new Tower[5];
+//    private Tower[] redTower = new Tower[5];
 
     // Timer that keeps track of game-time.
     private double timer;
@@ -50,6 +49,7 @@ class GameScreen extends Screen {
     private String textMsg;
 
     private Button btnPlaceGem;
+    private Button btnPause;
 
 //    private static int[] JUMP_BTN_POS = {700, 350, 65, 65};
 //    private static int[] SHOOT_BTN_POS = {600, 350, 65, 65};
@@ -62,6 +62,8 @@ class GameScreen extends Screen {
         super(game);
 
         // Initialize game objects here
+
+        // Progress, Lives, Level etc.
         currentLevel = Level.createLevel(1, Assets.gameScreen, new Point(880, -10), new Point(120, 730));
         Progress.setCurrentLevel(currentLevel);
         currentLevel.addTurnPoint(new Point(880, 120));
@@ -79,27 +81,52 @@ class GameScreen extends Screen {
         border = new Background(0, 0, Assets.gameScreenBorder);
 
         currentWave = currentLevel.getCurrentWave();
+
         Progress.setCurrentWave(currentWave);
+        Progress.setLivesLeft(10);
 
         // Towers
-        redTower[0] = Tower.createTower(520, 120);
-        redTower[1] = Tower.createTower(480, 160);
-        redTower[2] = Tower.createTower(440, 200);
-        redTower[3] = Tower.createTower(400, 160);
-        redTower[4] = Tower.createTower(360, 120);
+//        redTower[0] = Tower.createTower(520, 120);
+//        redTower[1] = Tower.createTower(480, 160);
+//        redTower[2] = Tower.createTower(440, 200);
+//        redTower[3] = Tower.createTower(400, 160);
+//        redTower[4] = Tower.createTower(360, 120);
 
+        // Buttons
         btnPlaceGem = new PlaceGemButton(1045, 180);
+        btnPause = new PauseButton(1230, 0);
+
+
+        // Grid Invalid Build Points
+        Grid grid = new Grid(20, 20, 980, 680, 20, 20);
+        currentLevel.setGrid(grid);
+
+        grid.addInvalidBuildPointsRect(860, 60, 900, 180);  // Turnpoint 1
+        grid.addInvalidBuildPointsRect(820, 100, 860, 140); // Turnpoint 1
+
+        grid.addInvalidBuildPointsRect(380, 100, 500, 140);  // Turnpoint 2
+        grid.addInvalidBuildPointsRect(420, 140, 460, 180); // Turnpoint 2
+
+        grid.addInvalidBuildPointsRect(420, 540, 460, 660);  // Turnpoint 3
+        grid.addInvalidBuildPointsRect(460, 580, 500, 620); // Turnpoint 3
+
+        grid.addInvalidBuildPointsRect(820, 580, 940, 620);  // Turnpoint 4
+        grid.addInvalidBuildPointsRect(860, 540, 900, 580); // Turnpoint 4
+
+        grid.addInvalidBuildPointsRect(860, 300, 900, 420);  // Turnpoint 5
+        grid.addInvalidBuildPointsRect(820, 340, 860, 380); // Turnpoint 5
+
+        grid.addInvalidBuildPointsRect(60, 340, 180, 380);  // Turnpoint 6
+        grid.addInvalidBuildPointsRect(100, 380, 140, 420); // Turnpoint 6
 
         shootTouchId = -1;
         jumpTouchId = -1;
-
-        livesLeft = 10;
 
         timer = 0.00;
         timerString = "00:00.000";
         textMsg = "";
 
-        // Defining a paint object
+        // Defining a paint object for drawing the text.
         paint = new Paint();
         paint.setTextSize(30);
         paint.setTextAlign(Paint.Align.CENTER);
@@ -123,21 +150,19 @@ class GameScreen extends Screen {
     public void update(float deltaTime) {
         List touchEvents = game.getInput().getTouchEvents();
 
-        // We have four separate update methods in this example.
-        // Depending on the state of the game, we call different update methods.
-        // Refer to Unit 3's code. We did a similar thing without separating the
-        // update methods.
+        // We have four separate update methods.
+        // Depending on the gameState of the game, the appropriate update method is called.
 
-        if (state == GameState.Ready) {
+        if (gameState == GameState.Ready) {
             updateReady(touchEvents);
         }
-        if (state == GameState.Running) {
+        if (gameState == GameState.Running) {
             updateRunning(touchEvents, deltaTime);
         }
-        if (state == GameState.Paused) {
+        if (gameState == GameState.Paused) {
             updatePaused(touchEvents);
         }
-        if (state == GameState.GameOver) {
+        if (gameState == GameState.GameOver) {
             updateGameOver(touchEvents);
         }
     }
@@ -146,12 +171,10 @@ class GameScreen extends Screen {
 
         // This example starts with a "Ready" screen.
         // When the user touches the screen, the game begins.
-        // state now becomes GameState.Running.
+        // gameState now becomes GameState.Running.
         // Now the updateRunning() method will be called!
 
-        if (touchEvents.size() > 0) {
-            state = GameState.Running;
-        }
+
     }
 
     private void updateRunning(List touchEvents, float deltaTime) {
@@ -162,7 +185,9 @@ class GameScreen extends Screen {
         timerString = String.format(Locale.ENGLISH, "%02d:%02d.%03d", timer_min, timer_sec, timer_milli);
         spawnTimer += deltaTime;
 
-        int len = touchEvents.size();
+        updateTouchEvents(touchEvents, deltaTime);
+
+        /*int len = touchEvents.size();
         for (int i = 0; i < len; i++) {
             TouchEvent event = (TouchEvent) touchEvents.get(i);
 
@@ -172,12 +197,14 @@ class GameScreen extends Screen {
                 }
 
                 if (btnPlaceGem.isActive()) {
-                    if (inBoundsRect(event, 40, 40, 919, 639) && Grid.checkValidBuildLocation(Grid.getClosestBuildPointX(event.x), Grid.getClosestBuildPointY(event.y))) {
-                        textMsg = "";
-                        Tower.createTower(Grid.getClosestBuildPointX(event.x), Grid.getClosestBuildPointY(event.y));
-                    } else {
-                        if (!textMsg.equals("Invalid build location")) {
-                            textMsg = "Invalid build location";
+                    if (inBoundsRect(event, 40, 40, 919, 639)) {
+                        if (currentLevel.grid.checkValidBuildLocation(event.x, event.y)) {
+                            textMsg = "";
+                            Tower.createTower(event.x, event.y);
+                        } else {
+                            if (!textMsg.equals("Invalid build location")) {
+                                textMsg = "Invalid build location";
+                            }
                         }
                     }
 
@@ -185,12 +212,12 @@ class GameScreen extends Screen {
 
                 for (Button button : Button.getButtons()) {
                     if (button.isVisible() && inBoundsRect(event, button.getX(), button.getY(), button.getWidth(), button.getHeight())) {
-                        button.actions();
+                        button.actions(this);
                     }
                 }
             }
 
-        }
+        }*/
 
         /*// All touch inputs are handled here:
         int len = touchEvents.size();
@@ -275,8 +302,8 @@ class GameScreen extends Screen {
         }*/
 
         // Losing all your lives means game over
-        if (livesLeft <= 0) {
-            state = GameState.GameOver;
+        if (Progress.getLivesLeft() <= 0) {
+            gameState = GameState.GameOver;
         }
 
         // Call individual update() methods here.
@@ -293,6 +320,41 @@ class GameScreen extends Screen {
         updateTowers(deltaTime);
         updateProjectiles(deltaTime);
         updateEnemies(deltaTime);
+    }
+
+    private void updateTouchEvents(List touchEvents, float deltaTime) {
+        int len = touchEvents.size();
+        for (int i = 0; i < len; i++) {
+            TouchEvent event = (TouchEvent) touchEvents.get(i);
+            Grid grid = currentLevel.getGrid();
+
+            if (event.type == TouchEvent.TOUCH_UP) {
+                if (!textMsg.isEmpty()) {
+                    textMsg = "";
+                }
+
+                if (btnPlaceGem.isActive()) {
+                    if (inBoundsRect(event, 40, 40, 919, 639)) {
+                        if (grid.checkValidBuildLocation(event.x, event.y)) {
+                            textMsg = "";
+                            Tower.createTower(event.x, event.y);
+                        } else {
+                            if (!textMsg.equals("Invalid build location")) {
+                                textMsg = "Invalid build location";
+                            }
+                        }
+                    }
+
+                }
+
+                for (Button button : Button.getButtons()) {
+                    if (button.isVisible() && inBoundsRect(event, button.getX(), button.getY(), button.getWidth(), button.getHeight())) {
+                        button.actions(this);
+                    }
+                }
+            }
+
+        }
     }
 
     private void updateTowers(float deltaTime) {
@@ -335,21 +397,24 @@ class GameScreen extends Screen {
         return Math.sqrt(Math.pow((event.x - x), 2) + Math.pow((event.y - y), 2)) <= radius;
     }
 
+    private boolean inBoundsGrid(TouchEvent event, Grid grid) {
+        return (event.x > grid.getX() && event.x < grid.getX() + grid.getWidth() - 1 && event.y > grid.getY()
+                && event.y < grid.getY() + grid.getHeight() - 1);
+    }
+
     private void updatePaused(List touchEvents) {
         int len = touchEvents.size();
         for (int i = 0; i < len; i++) {
             TouchEvent event = (TouchEvent) touchEvents.get(i);
             if (event.type == TouchEvent.TOUCH_UP) {
-                if (inBoundsRect(event, 0, 0, 800, 240)) {
-
-                    if (!inBoundsRect(event, 0, 0, 35, 35)) {
-                        resume();
-                    }
+                if (inBoundsRect(event, 440, 180, 400, 100)) {
+                    resume();
                 }
 
-                if (inBoundsRect(event, 0, 240, 800, 240)) {
+                if (inBoundsRect(event, 490, 460, 300, 100)) {
                     nullify();
                     goToMenu();
+                    return;
                 }
             }
         }
@@ -360,7 +425,7 @@ class GameScreen extends Screen {
         for (int i = 0; i < len; i++) {
             TouchEvent event = (TouchEvent) touchEvents.get(i);
             if (event.type == TouchEvent.TOUCH_DOWN) {
-                if (inBoundsRect(event, 0, 0, 800, 480)) {
+                if (inBoundsRect(event, 0, 0, 1280, 720)) {
                     nullify();
                     goToMenu();
                     return;
@@ -388,6 +453,29 @@ class GameScreen extends Screen {
     // are placed here.
     @Override
     public void paint(float deltaTime) {
+        if (gameState == GameState.Ready || gameState == GameState.Running) {
+            drawRunningUI();
+        }
+
+        if (gameState == GameState.Paused) {
+            drawRunningUI();
+            drawPausedUI();
+        }
+        if (gameState == GameState.GameOver) {
+            drawGameOverUI();
+        }
+
+    }
+
+    private void drawReadyUI() {
+        Graphics g = game.getGraphics();
+
+        g.drawARGB(155, 0, 0, 0);
+        g.drawString("Tap to Start", 400, 240, paint);
+
+    }
+
+    private void drawRunningUI() {
         Graphics g = game.getGraphics();
 
         // The Background
@@ -398,7 +486,7 @@ class GameScreen extends Screen {
         for (int i = 0; i < towers.size(); i++) {
             Tower t = towers.get(i);
             g.drawImage(t.getSprite(), t.getSpriteX(), t.getSpriteY());
-            g.drawCircle((int) t.getCenterX(), (int) t.getCenterY(), t.getAttackRange(), Color.WHITE, false);
+//            g.drawCircle((int) t.getCenterX(), (int) t.getCenterY(), t.getAttackRange(), Color.WHITE, false);
         }
 
         // The Projectiles
@@ -434,103 +522,65 @@ class GameScreen extends Screen {
             g.drawString(textMsg, 300, 650, paintDebug);
         }
 
+        // Debug Stuff
+//            if (!debugString.equals("")) {
+//                g.drawString(debugString, 150, 60, paintDebug);
+//                g.drawString(debugString2, 150, 110, paintDebug);
+//                g.drawString(debugString3, 150, 160, paintDebug);
+//                g.drawString("FPS: " + Math.round(1000.00f / debugFloat), 700, 60, paintDebug);
+//                g.drawString(timerString, 400, 60, paintDebug);
+//                g.drawString(debugStringJoystick, 600, 110, paintDebug);
+//            }
+    }
 
-        //grid.drawGridAll();
+    private void drawPausedUI() {
+        Graphics g = game.getGraphics();
+        // Darken the entire screen so you can display the Paused screen.
+        g.drawARGB(155, 0, 0, 0);
+        g.drawString("Resume", 640, 220, paint2);
+        g.drawString("Menu", 640, 500, paint2);
 
-//        // Debug Stuff
-//        if (!debugString.equals("")) {
-//            g.drawString(debugString, 150, 60, paintDebug);
-//            g.drawString(debugString2, 150, 110, paintDebug);
-//            g.drawString(debugString3, 150, 160, paintDebug);
-//            g.drawString("FPS: " + Math.round(1000.00f / debugFloat), 700, 60, paintDebug);
-            g.drawString(timerString, 400, 60, paintDebug);
-//            g.drawString(debugStringJoystick, 600, 110, paintDebug);
-//        }
+    }
 
-        // Draws the UI above the other things
-//        if (state == GameState.Ready) {
-//            drawReadyUI();
-//        }
-//        if (state == GameState.Running) {
-//            drawRunningUI();
-//        }
-//        if (state == GameState.Paused) {
-//            drawPausedUI();
-//        }
-//        if (state == GameState.GameOver) {
-//            drawGameOverUI();
-//        }
-
+    private void drawGameOverUI() {
+        Graphics g = game.getGraphics();
+        g.drawRect(0, 0, 1280, 720, Color.BLACK);
+        g.drawString("GAME OVER", 640, 360, paint2);
+        g.drawString("Tap to return", 640, 410, paint);
     }
 
     private void nullify() {
 
-        // Set all variables to null. You will be recreating them in the
-        // constructor.
+        // Set all variables to null. You will be recreating them in the constructor.
 
         paint = null;
         bg = null;
+        border = null;
         currentLevel = null;
         currentWave = null;
 
         Enemy.getEnemies().clear();
-//        Projectile.getProjectiles().clear();
+        Projectile.getProjectiles().clear();
+        Tower.getTowers().clear();
+        Button.getButtons().clear();
 
         // Call garbage collector to clean up memory.
         System.gc();
 
     }
 
-    private void drawReadyUI() {
-        Graphics g = game.getGraphics();
-
-        g.drawARGB(155, 0, 0, 0);
-        g.drawString("Tap to Start", 400, 240, paint);
-
-    }
-
-//    private void drawRunningUI() {
-//        Graphics g = game.getGraphics();
-//
-//        // Draws the Buttons for the UI.
-//        // g.drawImage(srcImg, x, y, srcX, srcY, width, height)
-//
-//        g.drawImage(Assets.button, JUMP_BTN_POS[0], JUMP_BTN_POS[1], 0, 0, JUMP_BTN_POS[2], JUMP_BTN_POS[3]);
-//        g.drawImage(Assets.button, SHOOT_BTN_POS[0], SHOOT_BTN_POS[1], 0, 65, SHOOT_BTN_POS[2], SHOOT_BTN_POS[3]);
-//        g.drawImage(Assets.button, PAUSE_BTN_POS[0], PAUSE_BTN_POS[1], 0, 195, PAUSE_BTN_POS[2], PAUSE_BTN_POS[3]);
-//        g.drawImage(joystick.getSpriteCircle(), joystick.getSpriteCircleX(), joystick.getSpriteCircleY());
-//        g.drawImage(joystick.getSpriteMiddle(), joystick.getSpriteMiddleX(), joystick.getSpriteMiddleY());
-//    }
-
-    private void drawPausedUI() {
-        Graphics g = game.getGraphics();
-        // Darken the entire screen so you can display the Paused screen.
-        g.drawARGB(155, 0, 0, 0);
-        g.drawString("Resume", 400, 165, paint2);
-        g.drawString("Menu", 400, 360, paint2);
-
-    }
-
-    private void drawGameOverUI() {
-        Graphics g = game.getGraphics();
-        g.drawRect(0, 0, 1281, 801, Color.BLACK);
-        g.drawString("GAME OVER", 400, 240, paint2);
-        g.drawString("Tap to return", 400, 290, paint);
-
-    }
-
     @Override
     public void pause() {
-        if (state == GameState.Running) {
-            state = GameState.Paused;
+        if (gameState == GameState.Running) {
+            gameState = GameState.Paused;
         }
 
     }
 
     @Override
     public void resume() {
-        if (state == GameState.Paused) {
-            state = GameState.Running;
+        if (gameState == GameState.Paused) {
+            gameState = GameState.Running;
         }
     }
 
@@ -547,5 +597,4 @@ class GameScreen extends Screen {
     private void goToMenu() {
         game.setScreen(new MainMenuScreen(game));
     }
-
 }

@@ -2,8 +2,8 @@ package com.example.firstaidtent.gemtd;
 
 import com.example.firstaidtent.framework.Image;
 
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 
 abstract class Button {
     private int x;
@@ -18,7 +18,7 @@ abstract class Button {
     private int priority;
     private int priorityCounter = 0;
 
-    private static Queue<Button> buttons = new PriorityQueue<>();
+    private static List<Button> buttons = new ArrayList<>();
 
     Button(int x, int y, int width, int height, Image img) {
         this.x = x;
@@ -35,7 +35,7 @@ abstract class Button {
         buttons.add(this);
     }
 
-    abstract void actions();
+    abstract void actions(GameScreen game);
 
     public int getX() {
         return x;
@@ -93,7 +93,7 @@ abstract class Button {
         this.img = img;
     }
 
-    public static Queue<Button> getButtons() {
+    public static List<Button> getButtons() {
         return buttons;
     }
 }

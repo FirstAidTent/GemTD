@@ -43,8 +43,10 @@ class LoadingScreen extends Screen {
         Assets.projectile = g.newImage("towers/projectiles/projectile.png", ImageFormat.ARGB4444);
 
         // Button Images
-        Assets.btnPlaceGem[0] = g.newImage("btn_place_gem.png", ImageFormat.ARGB4444);
-        Assets.btnPlaceGem[1] = g.newImage("btn_place_gem_active.png", ImageFormat.ARGB4444);
+        Assets.btnPlaceGem[0] = g.newImage("buttons/btn_place_gem.png", ImageFormat.ARGB4444);
+        Assets.btnPlaceGem[1] = g.newImage("buttons/btn_place_gem_active.png", ImageFormat.ARGB4444);
+        Assets.btnNextWave = g.newImage("buttons/btn_next_wave.png", ImageFormat.ARGB4444);
+        Assets.btnPause = g.newImage("buttons/btn_pause.png", ImageFormat.ARGB4444);
 
         // Stages
 //        Level[] level = new Level[3];
