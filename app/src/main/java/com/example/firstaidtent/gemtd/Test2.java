@@ -13,5 +13,6 @@ public class Test2 {
 
         System.out.println(set.contains(id));
         System.out.println(set.contains(id2));
+        System.out.println(set.contains(id2));
     }
 }
