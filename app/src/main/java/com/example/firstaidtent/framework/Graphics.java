@@ -18,6 +18,8 @@ public interface Graphics {
 
     void drawRect(int x, int y, int width, int height, int color);
 
+    void drawRect(int x, int y, int width, int height, int color, boolean fill);
+
     void drawCircle(int x, int y, double radius, int color, boolean fill);
 
     void drawImage(Image image, int x, int y, int srcX, int srcY,

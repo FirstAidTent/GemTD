@@ -1,24 +1,25 @@
 package com.example.firstaidtent.gemtd;
 
+import com.example.firstaidtent.framework.Graphics;
 import com.example.firstaidtent.framework.Image;
 
 import java.util.ArrayList;
 import java.util.List;
 
 abstract class Button {
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private Image img;
+    protected int x;
+    protected int y;
+    protected int width;
+    protected int height;
+    protected Image img;
 
-    private boolean visible;
-    private boolean active;
+    protected boolean visible;
+    protected boolean active;
 
-    private int priority;
-    private int priorityCounter = 0;
+    protected int priority;
+    protected int priorityCounter = 0;
 
-    private static List<Button> buttons = new ArrayList<>();
+    protected static List<Button> buttons = new ArrayList<>();
 
     Button(int x, int y, int width, int height, Image img) {
         this.x = x;
@@ -28,6 +29,7 @@ abstract class Button {
         this.img = img;
 
         visible = true;
+        active = false;
 
         priority = priorityCounter;
         priorityCounter++;
@@ -36,6 +38,12 @@ abstract class Button {
     }
 
     abstract void actions(GameScreen game);
+
+    synchronized void draw(Graphics g) {
+        if (isVisible()) {
+            g.drawImage(img, x, y);
+        }
+    }
 
     public int getX() {
         return x;

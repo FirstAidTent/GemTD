@@ -10,7 +10,9 @@ class Progress {
     }
 
     static void setCurrentLevel(Level currentLevel) {
-        Progress.currentLevel = currentLevel;
+        if (Level.getLevels().containsValue(currentLevel)) {
+            Progress.currentLevel = currentLevel;
+        }
     }
 
     static Wave getCurrentWave() {
@@ -31,5 +33,11 @@ class Progress {
 
     static void loseLife(int n) {
         setLivesLeft(getLivesLeft() - n);
+    }
+
+    static void nullify() {
+        currentLevel = null;
+        currentWave = null;
+        livesLeft = 0;
     }
 }

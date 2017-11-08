@@ -46,7 +46,7 @@ class Projectile {
         this.target = target;
     }
 
-    public void update(float deltaTime) {
+    public synchronized void update(float deltaTime) {
         if ((centerX > -20 && centerX <= GameScreen.SCREEN_WIDTH + 20) && (centerY > -20 && centerY <= GameScreen.SCREEN_HEIGHT + 20)) {
             move(deltaTime);
             updateSprite();
@@ -55,10 +55,6 @@ class Projectile {
         } else {
             visible = false;
             AoE = null;
-        }
-
-        if (!visible) {
-            projectiles.remove(this);
         }
     }
 

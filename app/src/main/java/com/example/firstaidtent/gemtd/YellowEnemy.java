@@ -9,6 +9,10 @@ class YellowEnemy extends Enemy {
         super(centerX, centerY, 20, Assets.yellowEnemy[0]);
     }
 
+    YellowEnemy(double centerX, double centerY, int health) {
+        super(centerX, centerY, health, Assets.yellowEnemy[0]);
+    }
+
     @Override
     double getOriginalSpeed() {
         return 150.00;

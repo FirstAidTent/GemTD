@@ -30,8 +30,7 @@ class MainMenuScreen extends Screen {
         }
     }
 
-    private boolean inBounds(TouchEvent event, int x, int y, int width,
-                             int height) {
+    private boolean inBounds(TouchEvent event, int x, int y, int width, int height) {
         return (event.x > x && event.x < x + width - 1 && event.y > y
                 && event.y < y + height - 1);
     }

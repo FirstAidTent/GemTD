@@ -1,5 +1,8 @@
 package com.example.firstaidtent.gemtd;
 
+import android.graphics.Color;
+
+import com.example.firstaidtent.framework.Graphics;
 import com.example.firstaidtent.framework.Image;
 
 import java.util.ArrayList;
@@ -26,6 +29,9 @@ class Tower {
     private int spriteX;
     private int spriteY;
 
+    private boolean isRemoved = false;
+
+    private static List<Tower> selectedTowers = new ArrayList<>();
     private static List<Tower> towers = new ArrayList<>();
 
     private Tower(int x, int y) {
@@ -59,8 +65,7 @@ class Tower {
     }
 
     static Tower createTower(int x, int y) {
-        // TODO: Get current level instead of 1.
-        Level level = Level.getLevel(1);
+        Level level = Progress.getCurrentLevel();
         int newX = level.getGrid().getClosestBuildPointX(x);
         int newY = level.getGrid().getClosestBuildPointY(y);
 
@@ -71,28 +76,49 @@ class Tower {
         return t;
     }
 
-    void update(float deltaTime) {
+    synchronized void update(float deltaTime) {
         attackCD -= deltaTime;
 
         updateSprite();
 
         if (currentTarget != null) {
             if (currentTarget.isDead() || targetOutOfRange()) {
-                searchTargetClosest();
+                currentTarget = searchTarget();
             } else {
                 attack();
             }
         } else {
-            searchTargetClosest();
+            currentTarget = searchTarget();
         }
     }
 
-    private void updateSprite() {
-        spriteX = (int) Math.round(centerX - sprite.getWidth() / 2);
-        spriteY = (int) Math.round(centerY - sprite.getHeight() / 2);
+    synchronized void draw(Graphics g) {
+        g.drawImage(getSprite(), getSpriteX(), getSpriteY());
+
+        if (selectedTowers.contains(this)) {
+            g.drawCircle((int) getCenterX(), (int) getCenterY(), getAttackRange(), Color.WHITE, false);
+        }
     }
 
-    private void attack() {
+    void select() {
+        selectedTowers.add(this);
+    }
+
+    static void deselectAll() {
+        selectedTowers.clear();
+    }
+
+    void remove() {
+        Level level = Progress.getCurrentLevel();
+        int newX = level.getGrid().getClosestBuildPointX((int) centerX);
+        int newY = level.getGrid().getClosestBuildPointY((int) centerY);
+
+        level.getGrid().removeInvalidBuildPointsSquareCenter(newX, newY, sprite.getWidth());
+
+        isRemoved = true;
+    }
+
+    protected void attack() {
         if (attackCD <= 0.00) {
             attackCD = attackRate;
 
@@ -101,44 +127,45 @@ class Tower {
         }
     }
 
+    protected Enemy searchTarget() {
+        return searchTargetClosest();
+    }
+
+    private void updateSprite() {
+        spriteX = (int) Math.round(centerX - sprite.getWidth() / 2);
+        spriteY = (int) Math.round(centerY - sprite.getHeight() / 2);
+    }
+
     // Searches for and sets the towers current target to the closest enemy.
-    private void searchTargetClosest() {
+    private Enemy searchTargetClosest() {
         List<Enemy> enemies = Enemy.getEnemies();
         double distance;
         double min_dist = 2000.00; // Is used to store the closest distance to an enemy.
         Enemy target = null;
-        Enemy e;
 
-        for (int i = 0; i < enemies.size(); i++) {
-            e = enemies.get(i);
-            distance = Math.sqrt(Math.pow((e.getCenterX() - centerX), 2) + Math.pow((e.getCenterY() - centerY), 2));
+        for (Enemy e : enemies) {
+            if (e.isSpawned()) {
+                distance = Math.sqrt(Math.pow((e.getCenterX() - centerX), 2) + Math.pow((e.getCenterY() - centerY), 2));
 
-            // Checks if the enemy is closer than the other enemies that have been checked.
-            if (distance < min_dist && distance <= attackRange) {
-                min_dist = distance;
-                target = e;
+                // Checks if the enemy is closer than the other enemies that have been checked.
+                if (distance < min_dist && distance <= attackRange) {
+                    min_dist = distance;
+                    target = e;
+                }
             }
         }
 
-        // If an enemy was found within the attack range, set the current target to the closest enemy found.
-        if (target != null) {
-            currentTarget = target;
-            return;
-        }
-
-        currentTarget = null;
+        return target;
     }
 
     // Works just like searchTargetClosest(), but searches for the target furthest away, but still within attack range.
-    private void searchTargetFurthest() {
+    private Enemy searchTargetFurthest() {
         List<Enemy> enemies = Enemy.getEnemies();
         double distance;
         double min_dist = 0.00;
         Enemy target = null;
-        Enemy e;
 
-        for (int i = 0; i < enemies.size(); i++) {
-            e = enemies.get(i);
+        for (Enemy e : enemies) {
             distance = Math.sqrt(Math.pow((e.getCenterX() - centerX), 2) + Math.pow((e.getCenterY() - centerY), 2));
             if (distance > min_dist && distance <= attackRange) {
                 min_dist = distance;
@@ -146,21 +173,15 @@ class Tower {
             }
         }
 
-        if (target != null) {
-            currentTarget = target;
-            return;
-        }
-
-        currentTarget = null;
+        return target;
     }
 
+    // Checks if there is an enemy within attack range of the tower.
     private boolean checkEnemiesInRange() {
         List<Enemy> enemies = Progress.getCurrentWave().getEnemies();
-        Enemy e;
         double distance;
 
-        for (int i = 0; i < enemies.size(); i++) {
-            e = enemies.get(i);
+        for (Enemy e : enemies) {
             distance = Math.sqrt(Math.pow((e.getCenterX() - centerX), 2) + Math.pow((e.getCenterY() - centerY), 2));
             if (distance <= attackRange) {
                 return true;
@@ -231,6 +252,14 @@ class Tower {
 
     public int getSpriteY() {
         return spriteY;
+    }
+
+    public boolean isRemoved() {
+        return isRemoved;
+    }
+
+    public static List<Tower> getSelectedTowers() {
+        return selectedTowers;
     }
 
     public static List<Tower> getTowers() {

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 class Level {
+    private int levelNum;
     private Background bg;
     private Point spawnPoint;
     private Point endPoint;
@@ -19,6 +20,7 @@ class Level {
     private static HashMap<Integer, Level> levels = new HashMap<>();
 
     private Level(int levelNum, Image bg, Point spawnPoint, Point endPoint) {
+        this.levelNum = levelNum;
         this.bg = new Background(0, 0, bg);
         this.spawnPoint = spawnPoint;
         this.endPoint = endPoint;
@@ -28,7 +30,8 @@ class Level {
     }
 
     /**
-     * Creates a new tower defense level. Used for when you want a new level layout and rules.
+     * Creates a new tower defense level. Used for when you want a new map layout and rules.
+     * You will have to manually put out the turn points where the enemies will sequentially go to.
      *
      * @param levelNum
      *        The level number for this level.
@@ -37,10 +40,11 @@ class Level {
      *        The background used for the level. It should be showing the level layout.
      *
      * @param spawnPoint
-     *        The point where the enemies will spawn from.
+     *        The point where the enemies will spawn from. Can be outside the visible map area.
      *
      * @param endPoint
      *        The point where the enemies will despawn. You will lose a life if enemies reach this point.
+     *        Can be outside the visible map area.
      *
      * @return The newly created level.
      */
@@ -85,6 +89,14 @@ class Level {
     }
 
     // Getters and Setters
+    public int getLevelNum() {
+        return levelNum;
+    }
+
+    public void setLevelNum(int levelNum) {
+        this.levelNum = levelNum;
+    }
+
     public Background getBg() {
         return bg;
     }

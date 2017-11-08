@@ -1,5 +1,6 @@
 package com.example.firstaidtent.gemtd;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,20 +30,49 @@ class Wave {
         return enemies.add(e);
     }
 
-    void addEnemyType(Enemy.EnemyType type, int n) {
+    void addEnemyType(Class<? extends Enemy> type, int n) {
         Enemy e;
+        Constructor<? extends Enemy> cons;
+
+        try {
+            cons = type.getDeclaredConstructor(double.class, double.class);
+        } catch (NoSuchMethodException ex) {
+            ex.printStackTrace();
+            return;
+        }
 
         for (int i = 0; i < n; i++) {
-            switch (type) {
-                case YELLOW_ENEMY:
-                    e = new YellowEnemy(level.getSpawnPoint().x, level.getSpawnPoint().y);
-                    e.setDestPoint(level.getTurnPoints().get(0));
-                    enemies.add(e);
-                    break;
-                case NULL:
-                    break;
-                default:
+            try {
+                e = cons.newInstance(level.getSpawnPoint().x, level.getSpawnPoint().y);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return;
             }
+            e.setDestPoint(level.getTurnPoints().get(0));
+            enemies.add(e);
+        }
+    }
+
+    void addEnemyType(Class<? extends Enemy> type, int n, int health) {
+        Enemy e;
+        Constructor<? extends Enemy> cons;
+
+        try {
+            cons = type.getDeclaredConstructor(double.class, double.class, int.class);
+        } catch (NoSuchMethodException ex) {
+            ex.printStackTrace();
+            return;
+        }
+
+        for (int i = 0; i < n; i++) {
+            try {
+                e = cons.newInstance(level.getSpawnPoint().x, level.getSpawnPoint().y, health);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return;
+            }
+            e.setDestPoint(level.getTurnPoints().get(0));
+            enemies.add(e);
         }
     }
 

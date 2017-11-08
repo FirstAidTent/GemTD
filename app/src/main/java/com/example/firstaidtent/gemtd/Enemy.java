@@ -1,8 +1,10 @@
 package com.example.firstaidtent.gemtd;
 
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 
+import com.example.firstaidtent.framework.Graphics;
 import com.example.firstaidtent.framework.Image;
 
 import java.util.ArrayList;
@@ -12,16 +14,13 @@ import java.util.List;
  * The common Enemy class. All different kind of enemies you want in the game should extend this class.
  * The necessary fields and methods for an enemy are defined in this class.
  * In your new class, you can add more things like resistance and such.
- * Add your new enemy class to the EnemyType Enum.
  */
 
 abstract class Enemy {
-    enum EnemyType {
-        YELLOW_ENEMY, NULL
-    }
 
     // Enemy Stats
     private int health;
+    private int maxHealth;
 
     // The center of where the enemy will appear.
     private double centerX;
@@ -47,17 +46,34 @@ abstract class Enemy {
     private int spriteX;
     private int spriteY;
 
-    // Hitbox of the enemy.
+    // Hitbox of the enemy. It will be set to a rectangle matching the size of the sprite.
+    // and therefore there will be no need to change it manually.
     private Rect hitbox;
 
     // Arraylist where all enemies are stored.
     private static List<Enemy> enemies = new ArrayList<>();
 
+    /**
+     * Main constructor for creating an enemy. Since this is an abstract class, you need to create a subclass and use it in there.
+     *
+     * @param centerX
+     *        The x of the point where you want the enemy to start.
+     *
+     * @param centerY
+     *        The y of the point where you want the enemy to start.
+     *
+     * @param health
+     *        The starting health for the enemies, which will also become the enemy's maximum health.
+     *
+     * @param sprite
+     *        The sprite you want to use for your enemy.
+     */
     Enemy(double centerX, double centerY, int health, Image sprite) {
         this.centerX = centerX;
         this.centerY = centerY;
 
         this.health = health;
+        this.maxHealth = health;
 
         destPoint = new Point(0, 0);
         speed = getOriginalSpeed();
@@ -77,7 +93,7 @@ abstract class Enemy {
 
     // The default update method for behavior methods for enemies.
     // Override it if you want to change enemy behavior.
-    void update(float deltaTime) {
+    synchronized void update(float deltaTime) {
         if (isSpawned) {
             if (health > 0) {
                 move(deltaTime);
@@ -92,7 +108,7 @@ abstract class Enemy {
     // Set the original speed of the enemy. Is used for calculating speed/slow effects.
     abstract double getOriginalSpeed();
 
-    private void move(float deltaTime) {
+    protected void move(float deltaTime) {
         if (destPoint != null) {
 
             // If distance between the enemy and the destination point is less than some pixels,
@@ -102,6 +118,7 @@ abstract class Enemy {
                 if (destPoint.equals(Progress.getCurrentLevel().getEndPoint())) {
                     die();
                     Progress.loseLife(1);
+                    GameScreen.debugString2 = "Lives: " + Progress.getLivesLeft();
                 }
 
                 moveTo(destPoint.x, destPoint.y);
@@ -130,20 +147,35 @@ abstract class Enemy {
         }
     }
 
-    private void updateSprite() {
+    protected void updateSprite() {
         spriteX = (int) Math.round(centerX - sprite.getWidth() / 2);
         spriteY = (int) Math.round(centerY - sprite.getHeight() / 2);
     }
 
     // The enemies hitbox needs to be updated every time the enemy moves.
-    private void updateHitbox() {
+    protected void updateHitbox() {
         int cornerX = (int) Math.round(centerX - sprite.getWidth() / 2);
         int cornerY = (int) Math.round(centerY - sprite.getHeight() / 2);
 
         hitbox.set(cornerX, cornerY, cornerX + sprite.getWidth(), cornerY + sprite.getHeight());
     }
 
-    // Instantly moves the enemy to the given x and y coordinates.
+    synchronized void draw(Graphics g) {
+        if ((spriteX > -100 && spriteX < GameScreen.SCREEN_WIDTH + 100) &&
+                (spriteY > -100 && spriteY < GameScreen.SCREEN_HEIGHT + 100) &&
+                isSpawned) {
+
+            g.drawImage(sprite, spriteX, spriteY);
+
+            // Health Bar
+            g.drawRect(spriteX + 2, spriteY - 6, sprite.getWidth() - 4, 4, Color.RED);
+            g.drawRect(spriteX + 2, spriteY - 6, (int)Math.ceil((sprite.getWidth() - 4) * (((double)health) / ((double)maxHealth))), 4, Color.GREEN);
+        }
+    }
+
+    /**
+     * Instantly moves the enemy to the given x and y coordinates.
+     */
     void moveTo(double x, double y) {
         centerX = x;
         centerY = y;
@@ -151,8 +183,7 @@ abstract class Enemy {
 
     // What happens when the enemy dies. By default, it gets removed from the enemy group,
     // which stops the updating and painting of the enemy.
-    void die() {
-        enemies.remove(this);
+    protected void die() {
         isSpawned = false;
         isDead = true;
     }
@@ -164,6 +195,14 @@ abstract class Enemy {
 
     public void setHealth(int health) {
         this.health = health;
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+
+    public void setMaxHealth(int maxHealth) {
+        this.maxHealth = maxHealth;
     }
 
     public double getSpeed() {

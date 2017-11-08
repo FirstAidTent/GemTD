@@ -3,6 +3,7 @@ package com.example.firstaidtent.gemtd;
 import android.graphics.Point;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 class Grid {
@@ -47,19 +48,43 @@ class Grid {
 
         for (int i = newX; i <= x2; i += boxWidth) {
             for (int j = newY; j <= y2; j += boxHeight) {
-                exists = false;
-                for (Point p : invalidBuildPoints) {
+                invalidBuildPoints.add(new Point(i, j));
+            }
+        }
+
+        return true;
+    }
+
+    boolean removeInvalidBuildPointsSquareCenter(int x, int y, int length) {
+        return removeInvalidBuildPointsRect(x - length / 2, y - length / 2, x + length / 2, y + length / 2);
+    }
+
+    boolean removeInvalidBuildPointsRect(int x, int y, int x2, int y2) {
+        if (x > x2 || y > y2) {
+            return false;
+        }
+
+        int newX = x;
+        int newY = y;
+
+        if (x % boxWidth != 0) {
+            newX = x + (boxWidth - x % boxWidth);
+        }
+
+        if (y % boxHeight != 0) {
+            newY = y + (boxHeight - y % boxHeight);
+        }
+
+        for (int i = newX; i <= x2; i += boxWidth) {
+            for (int j = newY; j <= y2; j += boxHeight) {
+                Iterator<Point> iter = invalidBuildPoints.iterator();
+                while (iter.hasNext()) {
+                    Point p = iter.next();
                     if (i == p.x && j == p.y) {
-                        exists = true;
+                        iter.remove();
                         break;
                     }
                 }
-
-                if (exists) {
-                    continue;
-                }
-
-                invalidBuildPoints.add(new Point(i, j));
             }
         }
 
@@ -167,7 +192,7 @@ class Grid {
         this.boxHeight = boxHeight;
     }
 
-    List<Point> getInvalidBuildPoints() {
+    public List<Point> getInvalidBuildPoints() {
         return invalidBuildPoints;
     }
 }

@@ -13,6 +13,7 @@ class Assets {
     static Image towerRed;
     static Image[] gems = new Image[10];
     static Image[] btnPlaceGem = new Image[2];
+    static Image btnRemoveGem;
     static Image btnNextWave;
     static Image btnPause;
     //static Sound click;

@@ -2,7 +2,7 @@ package com.example.firstaidtent.gemtd;
 
 class PlaceGemButton extends Button {
     PlaceGemButton(int x, int y) {
-        super(x, y, 200, 50, Assets.btnPlaceGem[0]);
+        super(x, y, Constants.BTN_PLACE_GEM[2], Constants.BTN_PLACE_GEM[3], Assets.btnPlaceGem[0]);
     }
 
     @Override
